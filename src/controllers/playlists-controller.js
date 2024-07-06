@@ -71,5 +71,48 @@ module.exports = {
         const deletedPlaylist = playlists.splice(playlistIndex, 1)
     
         res.json(deletedPlaylist)
-      }
-    }
+      },
+
+      // POST /api/playlists/:id/musics
+      addMusic: (req, res) => {
+        const {title, year, artist, album } = req.body 
+        const {id} = req.params
+
+        const playlist = playlists.find(pl => pl.id === +id)
+        if(!playlist) return res.status(404).json({message: 'playlist not found'})
+
+        if (typeof title !== 'string' || typeof year !== 'number' || typeof artist !== 'string' || typeof album !== 'string') {
+            return res.status(400).json({ message: 'invalid fields'})
+        }
+        
+        const newMusic = {
+            id: Math.floor(Math.random() * 999999),
+            title: title,
+            year: year,
+            artist: artist,
+            album: album
+        }
+
+        playlist.musics.push(newMusic)
+        res.status(201).json(newMusic)
+      },
+
+      //DELETE /api/playlists/:playlistId/musics/musicId
+     removeMusic: (req, res) => {
+        const {playlistId, musicId} = req.params
+        const playlist = playlist.find(pl => pl.id === +playlistId)
+
+        if (!playlist){
+            res.status(404).json({message: "playlist not found"})
+        }
+
+        const musicIndex = playlist.musics.findIndex(music => music.id === +musicId)
+
+        if (musicIndex === -1) {
+            res.status(404).json({ message: 'music not found' })
+          }
+
+        playlist.musics.splice(musicIndex, 1)
+
+        res.status(204).end()
+}}
